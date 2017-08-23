@@ -1,12 +1,29 @@
 # github-contrib
 
-github-contrib is a tool to generate the following statistics of a contributor across _all_ public repositories in a Github organization.
+github-contrib is a tool to create a list of the following for a contributor across all repos in a Github organization.
 
 1. Pull Requests created.
 2. Issues created.
-3. Pull Requests reviewed (but not created).
+3. Pull Requests reviewed.
 
-The output will be in the markdown format. You can copy and paste the output in a markdown file. [[Sample Output](https://gist.github.com/nikhita/b31ab2bf33d00a5ce185b0850d61df57)]
+The output will be in the markdown format. You can copy and paste the output to a markdown file ([Sample Output](https://gist.github.com/nikhita/b31ab2bf33d00a5ce185b0850d61df57)) and proudly show it to others. :sunglasses:
+
+## Installation
+
+**Prerequisites**: Go version 1.7 or greater.
+
+1. Get the code
+
+```
+$ go get github.com/nikhita/github-contrib
+```
+
+2. Build
+
+```
+$ cd $GOPATH/src/github.com/nikhita/github-contrib
+$ go install
+```
 
 ## Usage
 
@@ -27,3 +44,6 @@ github-contrib -token=<your-token> <org> <github-handle>
     	print version and exit.
 ```
 
+## License
+
+github-contrib is licensed under the [MIT License](/LICENSE).
