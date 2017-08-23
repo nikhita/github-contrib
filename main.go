@@ -53,13 +53,12 @@ func GetAllRepos(ctx context.Context, client *github.Client, org, author string)
 		GetIssues(ctx, client, org, repo, author)
 		GetReviewedPullRequests(ctx, client, org, repo, author)
 	}
-
 }
 
 // GetPullRequests gets all Pull Requests created by the author in the repo owned by the org.
 func GetPullRequests(ctx context.Context, client *github.Client, org, repo, author string) {
 	sleepIfRateLimitExceeded(ctx, client)
-	allPullRequestsquery := "is:pr+repo:" + org + "/" + repo + "+author:" + author
+	allPullRequestsquery := "is:pr repo:" + org + "/" + repo + " author:" + author
 	opt := &github.SearchOptions{
 		ListOptions: github.ListOptions{
 			PerPage: 100,
@@ -73,7 +72,7 @@ func GetPullRequests(ctx context.Context, client *github.Client, org, repo, auth
 
 	totalPullRequests := pullRequestResults.GetTotal()
 	if totalPullRequests != 0 {
-		fmt.Println("Total Pull Requests: ", totalPullRequests)
+		fmt.Println("Total Pull Requests Created: ", totalPullRequests)
 	}
 
 	for key, pr := range pullRequestResults.Issues {
@@ -87,7 +86,7 @@ func GetPullRequests(ctx context.Context, client *github.Client, org, repo, auth
 // GetIssues gets all issues created by the author in the repo owned by the org.
 func GetIssues(ctx context.Context, client *github.Client, org, repo, author string) {
 	sleepIfRateLimitExceeded(ctx, client)
-	allIssuesquery := "is:issue+repo:" + org + "/" + repo + "+author:" + author
+	allIssuesquery := "is:issue repo:" + org + "/" + repo + " author:" + author
 	opt := &github.SearchOptions{
 		ListOptions: github.ListOptions{
 			PerPage: 100,
@@ -117,7 +116,7 @@ func GetIssues(ctx context.Context, client *github.Client, org, repo, author str
 func GetReviewedPullRequests(ctx context.Context, client *github.Client, org, repo, author string) {
 	sleepIfRateLimitExceeded(ctx, client)
 	// this lists all pull requests reviewed (including the ones authored)
-	allReviewedPullRequestsQuery := "is:pr+repo:" + org + "/" + repo + "+reviewed-by:" + author
+	allReviewedPullRequestsQuery := "is:pr repo:" + org + "/" + repo + " reviewed-by:" + author
 	opt := &github.SearchOptions{
 		ListOptions: github.ListOptions{
 			PerPage: 100,
@@ -130,7 +129,7 @@ func GetReviewedPullRequests(ctx context.Context, client *github.Client, org, re
 	}
 
 	sleepIfRateLimitExceeded(ctx, client)
-	reviewedAndAuthoredQuery := "is:pr+repo:" + org + "/" + repo + "+reviewed-by:" + author + "+author:" + author
+	reviewedAndAuthoredQuery := "is:pr repo:" + org + "/" + repo + " reviewed-by:" + author + " author:" + author
 	reviewedAndAuthoredResults, _, err := client.Search.Issues(ctx, reviewedAndAuthoredQuery, opt)
 	if err != nil {
 		fmt.Println(err)
@@ -169,6 +168,7 @@ func sleepIfRateLimitExceeded(ctx context.Context, client *github.Client) {
 	}
 
 	if rateLimit.Search.Remaining == 1 {
-		time.Sleep(1 * time.Minute)
+		timeToSleep := rateLimit.Search.Reset.Sub(time.Now())
+		time.Sleep(timeToSleep)
 	}
 }
