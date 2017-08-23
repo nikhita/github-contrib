@@ -15,6 +15,8 @@ import (
 const (
 	// BANNER is what is printed for help/info output.
 	BANNER = "github-contrib : %s\n"
+	// USAGE is an example of how the command should be used.
+	USAGE = "USAGE:\ngithub-contrib -token=<your-token> <org> <github-handle>"
 	// VERSION is the binary version.
 	VERSION = "v0.1.0"
 )
@@ -31,6 +33,7 @@ func init() {
 
 	flag.Usage = func() {
 		fmt.Fprint(os.Stderr, fmt.Sprintf(BANNER, VERSION))
+		fmt.Println(USAGE)
 		flag.PrintDefaults()
 	}
 
