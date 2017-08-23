@@ -27,7 +27,7 @@ var (
 )
 
 func init() {
-	flag.StringVar(&token, "token", "", "GitHub API token. Mandatory.")
+	flag.StringVar(&token, "token", "", "Mandatory GitHub API token.")
 	flag.BoolVar(&version, "version", false, "print version and exit.")
 	flag.BoolVar(&version, "v", false, "print version and exit (shorthand).")
 

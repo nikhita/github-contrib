@@ -38,7 +38,7 @@ github-contrib : v0.1.0
 USAGE:
 github-contrib -token=<your-token> <org> <github-handle>
   -token string
-    	GitHub API token. Mandatory.
+    	Mandatory GitHub API token.
   -v	print version and exit (shorthand).
   -version
     	print version and exit.
