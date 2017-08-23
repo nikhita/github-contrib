@@ -33,11 +33,11 @@ func main() {
 
 	client := github.NewClient(tc)
 
-	GetAllRepos(ctx, client, org, author)
+	getAllRepos(ctx, client, org, author)
 }
 
-// GetAllRepos gets all Pull Requests and Issues created and reviewed by the author.
-func GetAllRepos(ctx context.Context, client *github.Client, org, author string) {
+// getAllRepos gets all Pull Requests and Issues created and reviewed by the author.
+func getAllRepos(ctx context.Context, client *github.Client, org, author string) {
 	opt := &github.RepositoryListByOrgOptions{Type: "public"}
 	repos, _, err := client.Repositories.ListByOrg(ctx, org, opt)
 	if err != nil {
@@ -49,14 +49,14 @@ func GetAllRepos(ctx context.Context, client *github.Client, org, author string)
 		repo := repository.GetName()
 		fmt.Printf("Repository: %s\n", repo)
 
-		GetPullRequests(ctx, client, org, repo, author)
-		GetIssues(ctx, client, org, repo, author)
-		GetReviewedPullRequests(ctx, client, org, repo, author)
+		getCreatedPullRequests(ctx, client, org, repo, author)
+		getIssues(ctx, client, org, repo, author)
+		getReviewedPullRequests(ctx, client, org, repo, author)
 	}
 }
 
-// GetPullRequests gets all Pull Requests created by the author in the repo owned by the org.
-func GetPullRequests(ctx context.Context, client *github.Client, org, repo, author string) {
+// getPullRequests gets all Pull Requests created by the author in the repo owned by the org.
+func getCreatedPullRequests(ctx context.Context, client *github.Client, org, repo, author string) {
 	sleepIfRateLimitExceeded(ctx, client)
 	allPullRequestsquery := "is:pr repo:" + org + "/" + repo + " author:" + author
 	opt := &github.SearchOptions{
@@ -83,8 +83,8 @@ func GetPullRequests(ctx context.Context, client *github.Client, org, repo, auth
 	}
 }
 
-// GetIssues gets all issues created by the author in the repo owned by the org.
-func GetIssues(ctx context.Context, client *github.Client, org, repo, author string) {
+// getIssues gets all issues created by the author in the repo owned by the org.
+func getIssues(ctx context.Context, client *github.Client, org, repo, author string) {
 	sleepIfRateLimitExceeded(ctx, client)
 	allIssuesquery := "is:issue repo:" + org + "/" + repo + " author:" + author
 	opt := &github.SearchOptions{
@@ -100,7 +100,7 @@ func GetIssues(ctx context.Context, client *github.Client, org, repo, author str
 
 	totalIssues := issuesResults.GetTotal()
 	if totalIssues != 0 {
-		fmt.Println("Total Issues: ", totalIssues)
+		fmt.Println("Total Issues Opened: ", totalIssues)
 	}
 
 	for key, issue := range issuesResults.Issues {
@@ -111,11 +111,11 @@ func GetIssues(ctx context.Context, client *github.Client, org, repo, author str
 	}
 }
 
-// GetReviewedPullRequests gets all Pull Requests reviewed by the author in the repo owned by the org.
+// getReviewedPullRequests gets all Pull Requests reviewed by the author in the repo owned by the org.
 // This does not include PRs created by the author.
-func GetReviewedPullRequests(ctx context.Context, client *github.Client, org, repo, author string) {
+func getReviewedPullRequests(ctx context.Context, client *github.Client, org, repo, author string) {
 	sleepIfRateLimitExceeded(ctx, client)
-	// this lists all pull requests reviewed (including the ones authored)
+	// this lists all pull requests reviewed (including the ones authored).
 	allReviewedPullRequestsQuery := "is:pr repo:" + org + "/" + repo + " reviewed-by:" + author
 	opt := &github.SearchOptions{
 		ListOptions: github.ListOptions{
@@ -139,7 +139,7 @@ func GetReviewedPullRequests(ctx context.Context, client *github.Client, org, re
 	// this lists pull requests reviewed but NOT authored.
 	totalReviewedAndNotAuthored := allReviewedResults.GetTotal() - reviewedAndAuthoredResults.GetTotal()
 	if totalReviewedAndNotAuthored != 0 {
-		fmt.Println("Total Reviewed Pull Requests: ", totalReviewedAndNotAuthored)
+		fmt.Println("Total Pull Requests Reviewed: ", totalReviewedAndNotAuthored)
 	}
 
 	// mark authored Pull Requests as "seen".
