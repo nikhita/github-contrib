@@ -34,6 +34,8 @@ Since Github enforces a rate limit on requests, you will need a personal API tok
 Please note that Github has a rate limit of 30 requests per minute for the search API so this will take some time fetch all results.
 But don't worry, it should not take more than a few minutes! :smile:
 
+The org and github-handle arguments are currently mandatory.
+
 ```
 github-contrib : v0.1.0
 USAGE:
@@ -44,6 +46,19 @@ github-contrib -token=<your-token> <org> <github-handle>
   -version
     	print version and exit
 ```
+
+## Output
+
+The maximum number of created Pull Requests which are displayed for each repository is 100. They are displayed in the descending order of creation.
+
+The output is in the markdown format. You can copy and paste it in a markdown file and share it as a gist, etc.
+
+**TODO**:
+
+The following are pretty easy to accomplish but lead to a lot of API calls making it potentially slower.
+
+- [ ] Allow displaying more than 100 Pull Requests for each repo.
+- [ ] Make the org argument optional.
 
 ## License
 
