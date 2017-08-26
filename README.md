@@ -6,7 +6,9 @@ github-contrib is a tool to create a list of the following for a contributor acr
 2. Issues created.
 3. Pull Requests reviewed.
 
-The output will be in the markdown format. You can copy and paste the output to a markdown file ([Sample Output](https://gist.github.com/nikhita/b31ab2bf33d00a5ce185b0850d61df57)) and proudly show it to others. :sunglasses:
+The output will be in the markdown format. You can copy and paste the output to a markdown file ([Sample Output](/output/sample-output.md)) and proudly show it to others. :sunglasses:
+
+Also, a friendly reminder that contributions are not limited to code - it is about much more than that!
 
 ## Installation
 
@@ -33,15 +35,14 @@ Please note that Github has a rate limit of 30 requests per minute for the searc
 But don't worry, it should not take more than a few minutes! :smile:
 
 ```
-$ github-contrib -h                                                                        
 github-contrib : v0.1.0
 USAGE:
 github-contrib -token=<your-token> <org> <github-handle>
   -token string
-    	Mandatory GitHub API token.
-  -v	print version and exit (shorthand).
+    	Mandatory GitHub API token
+  -v	print version and exit (shorthand)
   -version
-    	print version and exit.
+    	print version and exit
 ```
 
 ## License

@@ -27,9 +27,9 @@ var (
 )
 
 func init() {
-	flag.StringVar(&token, "token", "", "Mandatory GitHub API token.")
-	flag.BoolVar(&version, "version", false, "print version and exit.")
-	flag.BoolVar(&version, "v", false, "print version and exit (shorthand).")
+	flag.StringVar(&token, "token", "", "Mandatory GitHub API token")
+	flag.BoolVar(&version, "version", false, "print version and exit")
+	flag.BoolVar(&version, "v", false, "print version and exit (shorthand)")
 
 	flag.Usage = func() {
 		fmt.Fprint(os.Stderr, fmt.Sprintf(BANNER, VERSION))
@@ -50,15 +50,15 @@ func init() {
 }
 
 func main() {
-	args := os.Args[1:]
+	args := flag.Args()
 
-	if len(args) != 3 {
+	if len(args) != 2 {
 		fmt.Println("Wrong number of arguments!")
 		os.Exit(1)
 	}
 
-	org := args[1]
-	author := args[2]
+	org := args[0]
+	author := args[1]
 
 	ctx := context.Background()
 
@@ -91,13 +91,15 @@ func getAllRepos(ctx context.Context, client *github.Client, org, author string)
 		output = append(output, getIssues(ctx, client, org, repo, author)...)
 		output = append(output, getReviewedPullRequests(ctx, client, org, repo, author)...)
 
-		// for markdown-friendly output
-		// TODO: refractor to be plain text friendly
 		if len(output) != 0 {
+			// for markdown-friendly output
+			// TODO: refractor to be plain text friendly
 			fmt.Printf("**Repository: %s**\n", repo)
+
 			for _, line := range output {
 				fmt.Println(line)
 			}
+
 			fmt.Printf("\n\n")
 		}
 	}
@@ -111,7 +113,7 @@ func getCreatedPullRequests(ctx context.Context, client *github.Client, org, rep
 	allPullRequestsquery := "is:pr repo:" + org + "/" + repo + " author:" + author
 	opt := &github.SearchOptions{
 		ListOptions: github.ListOptions{
-			PerPage: 50,
+			PerPage: 100,
 		},
 	}
 
@@ -144,7 +146,7 @@ func getIssues(ctx context.Context, client *github.Client, org, repo, author str
 	allIssuesquery := "is:issue repo:" + org + "/" + repo + " author:" + author
 	opt := &github.SearchOptions{
 		ListOptions: github.ListOptions{
-			PerPage: 50,
+			PerPage: 100,
 		},
 	}
 
@@ -170,54 +172,33 @@ func getIssues(ctx context.Context, client *github.Client, org, repo, author str
 }
 
 // getReviewedPullRequests gets all Pull Requests reviewed by the author.
-// This does NOT include PRs created by the author.
 func getReviewedPullRequests(ctx context.Context, client *github.Client, org, repo, author string) []string {
 	sleepIfRateLimitExceeded(ctx, client)
 	var reviewedPullRequests []string
 
-	// this lists all pull requests reviewed (including the ones authored).
-	allReviewedPullRequestsQuery := "is:pr repo:" + org + "/" + repo + " reviewed-by:" + author
+	allReviewedPullRequestsquery := "is:pr repo:" + org + "/" + repo + " reviewed-by:" + author + " -author:" + author
 	opt := &github.SearchOptions{
 		ListOptions: github.ListOptions{
-			PerPage: 50,
+			PerPage: 100,
 		},
 	}
 
-	allReviewedResults, _, err := client.Search.Issues(ctx, allReviewedPullRequestsQuery, opt)
+	reviewedPullRequestResults, _, err := client.Search.Issues(ctx, allReviewedPullRequestsquery, opt)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
 
-	sleepIfRateLimitExceeded(ctx, client)
-	reviewedAndAuthoredQuery := "is:pr repo:" + org + "/" + repo + " reviewed-by:" + author + " author:" + author
-	reviewedAndAuthoredResults, _, err := client.Search.Issues(ctx, reviewedAndAuthoredQuery, opt)
-	if err != nil {
-		fmt.Println(err)
-		os.Exit(1)
+	totalReviewedPullRequests := reviewedPullRequestResults.GetTotal()
+	if totalReviewedPullRequests != 0 {
+		reviewedPullRequests = append(reviewedPullRequests, fmt.Sprintf("\nTotal Pull Requests Reviewed: %v", totalReviewedPullRequests))
 	}
 
-	// this lists pull requests reviewed but NOT authored.
-	totalReviewedAndNotAuthored := allReviewedResults.GetTotal() - reviewedAndAuthoredResults.GetTotal()
-	if totalReviewedAndNotAuthored != 0 {
-		reviewedPullRequests = append(reviewedPullRequests, fmt.Sprintf("\nTotal Pull Requests Reviewed: %v", totalReviewedAndNotAuthored))
-	}
-
-	// mark authored Pull Requests as "seen".
-	reviewedAndAuthored := make(map[int]bool, reviewedAndAuthoredResults.GetTotal())
-	for _, authoredPR := range reviewedAndAuthoredResults.Issues {
-		reviewedAndAuthored[authoredPR.GetNumber()] = true
-	}
-
-	key := 0
-	for _, pr := range allReviewedResults.Issues {
-		if !reviewedAndAuthored[pr.GetNumber()] {
-			serialNumber := fmt.Sprintf("%v. ", key+1)
-			pullRequestLink := fmt.Sprintf("[%s/%s#%v](%s) - ", org, repo, pr.GetNumber(), pr.GetHTMLURL()) // org/repo#number
-			pullRequestTitle := fmt.Sprintf("%s", pr.GetTitle())
-			reviewedPullRequests = append(reviewedPullRequests, fmt.Sprintf("%s%s%s", serialNumber, pullRequestLink, pullRequestTitle))
-			key++
-		}
+	for key, pr := range reviewedPullRequestResults.Issues {
+		serialNumber := fmt.Sprintf("%v. ", key+1)
+		pullRequestLink := fmt.Sprintf("[%s/%s#%v](%s) - ", org, repo, pr.GetNumber(), pr.GetHTMLURL()) // org/repo#number
+		pullRequestTitle := fmt.Sprintf("%s", pr.GetTitle())
+		reviewedPullRequests = append(reviewedPullRequests, fmt.Sprintf("%s%s%s", serialNumber, pullRequestLink, pullRequestTitle))
 	}
 
 	return reviewedPullRequests
@@ -231,7 +212,7 @@ func sleepIfRateLimitExceeded(ctx context.Context, client *github.Client) {
 	}
 
 	if rateLimit.Search.Remaining == 1 {
-		timeToSleep := rateLimit.Search.Reset.Sub(time.Now())
+		timeToSleep := rateLimit.Search.Reset.Sub(time.Now()) + time.Second
 		time.Sleep(timeToSleep)
 	}
 }
