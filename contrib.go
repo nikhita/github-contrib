@@ -130,9 +130,9 @@ func getCreatedPullRequests(ctx context.Context, client *github.Client, org, rep
 
 	for key, pr := range pullRequestResults.Issues {
 		serialNumber := fmt.Sprintf("%v. ", key+1)
-		pullRequestLink := fmt.Sprintf("[%s/%s#%v](%s) - ", org, repo, pr.GetNumber(), pr.GetHTMLURL()) // org/repo#number
+		pullRequestLink := fmt.Sprintf("%s - ", pr.GetHTMLURL())
 		pullRequestTitle := fmt.Sprintf("%s", pr.GetTitle())
-		createdPullRequests = append(createdPullRequests, fmt.Sprintf("%s%s%s", serialNumber, pullRequestLink, pullRequestTitle))
+		createdPullRequests = append(createdPullRequests, fmt.Sprintf("%s%s%s", serialNumber, pullRequestLink, pullRequestTitle)) // 1. url - title
 	}
 
 	return createdPullRequests
@@ -163,7 +163,7 @@ func getIssues(ctx context.Context, client *github.Client, org, repo, author str
 
 	for key, issue := range issuesResults.Issues {
 		serialNumber := fmt.Sprintf("%v. ", key+1)
-		issueLink := fmt.Sprintf("[%s/%s#%v](%s) - ", org, repo, issue.GetNumber(), issue.GetHTMLURL()) // org/repo#number
+		issueLink := fmt.Sprintf("%s - ", issue.GetHTMLURL())
 		issueTitle := fmt.Sprintf("%s", issue.GetTitle())
 		createdIssues = append(createdIssues, fmt.Sprintf("%s%s%s", serialNumber, issueLink, issueTitle))
 	}
@@ -196,7 +196,7 @@ func getReviewedPullRequests(ctx context.Context, client *github.Client, org, re
 
 	for key, pr := range reviewedPullRequestResults.Issues {
 		serialNumber := fmt.Sprintf("%v. ", key+1)
-		pullRequestLink := fmt.Sprintf("[%s/%s#%v](%s) - ", org, repo, pr.GetNumber(), pr.GetHTMLURL()) // org/repo#number
+		pullRequestLink := fmt.Sprintf("%s - ", pr.GetHTMLURL())
 		pullRequestTitle := fmt.Sprintf("%s", pr.GetTitle())
 		reviewedPullRequests = append(reviewedPullRequests, fmt.Sprintf("%s%s%s", serialNumber, pullRequestLink, pullRequestTitle))
 	}
