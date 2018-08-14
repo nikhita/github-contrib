@@ -10,8 +10,6 @@ The output will be in the markdown format. You can copy and paste the output to 
 
 Also, a friendly reminder that contributions are not limited to code - it is about much more than that!
 
-**Note**: If you are here for generating the list of contributions for the Kubernetes membership request, please use the [k8s-membership](https://github.com/nikhita/github-contrib/tree/k8s-membership) branch. It will generate the list in a format suitable for email. ([Example](https://groups.google.com/forum/#!topic/kubernetes-membership/2eZufXdd2Co))
-
 ## Installation
 
 **Prerequisites**: Go version 1.7 or greater.
