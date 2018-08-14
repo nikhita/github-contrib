@@ -10,6 +10,12 @@ The output will be in the markdown format. You can copy and paste the output to 
 
 Also, a friendly reminder that contributions are not limited to code - it is about much more than that!
 
+**Note**: This branch was originally created to support output which was suitable to be sent via email
+because Kubernetes org membership required a request to be sent to a mailing list.
+The [process](https://github.com/kubernetes/community/blob/master/community-membership.md) has now been updated
+to use GitHub issues, so markdown format from the master branch will work better.
+Keeping this branch as-is in case someone is interested.
+
 ## Installation
 
 **Prerequisites**: Go version 1.7 or greater.
