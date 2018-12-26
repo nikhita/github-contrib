@@ -22,8 +22,10 @@
 
 
 [[constraint]]
-  branch = "master"
+  # due to https://github.com/google/go-github/issues/1037
+  branch = "nikhita-listByOrg-acceptHeaders"
   name = "github.com/google/go-github"
+  source = "github.com/nikhita/go-github"
 
 [[constraint]]
   branch = "master"
