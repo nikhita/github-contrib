@@ -48,16 +48,17 @@ func (c CommitStats) String() string {
 
 // CommitFile represents a file modified in a commit.
 type CommitFile struct {
-	SHA         *string `json:"sha,omitempty"`
-	Filename    *string `json:"filename,omitempty"`
-	Additions   *int    `json:"additions,omitempty"`
-	Deletions   *int    `json:"deletions,omitempty"`
-	Changes     *int    `json:"changes,omitempty"`
-	Status      *string `json:"status,omitempty"`
-	Patch       *string `json:"patch,omitempty"`
-	BlobURL     *string `json:"blob_url,omitempty"`
-	RawURL      *string `json:"raw_url,omitempty"`
-	ContentsURL *string `json:"contents_url,omitempty"`
+	SHA              *string `json:"sha,omitempty"`
+	Filename         *string `json:"filename,omitempty"`
+	Additions        *int    `json:"additions,omitempty"`
+	Deletions        *int    `json:"deletions,omitempty"`
+	Changes          *int    `json:"changes,omitempty"`
+	Status           *string `json:"status,omitempty"`
+	Patch            *string `json:"patch,omitempty"`
+	BlobURL          *string `json:"blob_url,omitempty"`
+	RawURL           *string `json:"raw_url,omitempty"`
+	ContentsURL      *string `json:"contents_url,omitempty"`
+	PreviousFilename *string `json:"previous_filename,omitempty"`
 }
 
 func (c CommitFile) String() string {
@@ -127,9 +128,6 @@ func (s *RepositoriesService) ListCommits(ctx context.Context, owner, repo strin
 		return nil, nil, err
 	}
 
-	// TODO: remove custom Accept header when this API fully launches.
-	req.Header.Set("Accept", mediaTypeGitSigningPreview)
-
 	var commits []*RepositoryCommit
 	resp, err := s.client.Do(ctx, req, &commits)
 	if err != nil {
@@ -140,10 +138,9 @@ func (s *RepositoriesService) ListCommits(ctx context.Context, owner, repo strin
 }
 
 // GetCommit fetches the specified commit, including all details about it.
-// todo: support media formats - https://github.com/google/go-github/issues/6
 //
 // GitHub API docs: https://developer.github.com/v3/repos/commits/#get-a-single-commit
-// See also: https://developer.github.com//v3/git/commits/#get-a-single-commit provides the same functionality
+// See also: https://developer.github.com/v3/git/commits/#get-a-single-commit provides the same functionality
 func (s *RepositoriesService) GetCommit(ctx context.Context, owner, repo, sha string) (*RepositoryCommit, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/commits/%v", owner, repo, sha)
 
@@ -152,9 +149,6 @@ func (s *RepositoriesService) GetCommit(ctx context.Context, owner, repo, sha st
 		return nil, nil, err
 	}
 
-	// TODO: remove custom Accept header when this API fully launches.
-	req.Header.Set("Accept", mediaTypeGitSigningPreview)
-
 	commit := new(RepositoryCommit)
 	resp, err := s.client.Do(ctx, req, commit)
 	if err != nil {
@@ -162,6 +156,32 @@ func (s *RepositoriesService) GetCommit(ctx context.Context, owner, repo, sha st
 	}
 
 	return commit, resp, nil
+}
+
+// GetCommitRaw fetches the specified commit in raw (diff or patch) format.
+func (s *RepositoriesService) GetCommitRaw(ctx context.Context, owner string, repo string, sha string, opt RawOptions) (string, *Response, error) {
+	u := fmt.Sprintf("repos/%v/%v/commits/%v", owner, repo, sha)
+	req, err := s.client.NewRequest("GET", u, nil)
+	if err != nil {
+		return "", nil, err
+	}
+
+	switch opt.Type {
+	case Diff:
+		req.Header.Set("Accept", mediaTypeV3Diff)
+	case Patch:
+		req.Header.Set("Accept", mediaTypeV3Patch)
+	default:
+		return "", nil, fmt.Errorf("unsupported raw type %d", opt.Type)
+	}
+
+	var buf bytes.Buffer
+	resp, err := s.client.Do(ctx, req, &buf)
+	if err != nil {
+		return "", resp, err
+	}
+
+	return buf.String(), resp, nil
 }
 
 // GetCommitSHA1 gets the SHA-1 of a commit reference. If a last-known SHA1 is
@@ -193,7 +213,7 @@ func (s *RepositoriesService) GetCommitSHA1(ctx context.Context, owner, repo, re
 // CompareCommits compares a range of commits with each other.
 // todo: support media formats - https://github.com/google/go-github/issues/6
 //
-// GitHub API docs: https://developer.github.com/v3/repos/commits/index.html#compare-two-commits
+// GitHub API docs: https://developer.github.com/v3/repos/commits/#compare-two-commits
 func (s *RepositoriesService) CompareCommits(ctx context.Context, owner, repo string, base, head string) (*CommitsComparison, *Response, error) {
 	u := fmt.Sprintf("repos/%v/%v/compare/%v...%v", owner, repo, base, head)
 

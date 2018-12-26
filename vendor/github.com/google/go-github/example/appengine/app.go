@@ -3,7 +3,8 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-// The demo app shows how to use the github package on Google App Engine.
+// Package demo provides an app that shows how to use the github package on
+// Google App Engine.
 package demo
 
 import (
@@ -11,7 +12,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v21/github"
 	"golang.org/x/oauth2"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
