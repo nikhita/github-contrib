@@ -47,6 +47,11 @@ github-contrib -token=<your-token> <org> <github-handle>
     	print version and exit
 ```
 
+Example: get contribution list for `nikhita` against `kubernetes` community.
+```
+# github-contrib -token=<token> kubernetes nikhita
+```
+
 ## Output
 
 The maximum number of created Pull Requests which are displayed for each repository is 100. They are displayed in the descending order of creation.
