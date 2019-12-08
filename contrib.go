@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"time"
 
 	"golang.org/x/oauth2"
@@ -83,6 +84,11 @@ func getAllRepos(ctx context.Context, client *github.Client, org, author string)
 		os.Exit(1)
 	}
 
+	dir := "./output/" + org
+	file := author + ".md"
+	f := createOutputFile(dir, file)
+	defer f.Close()
+
 	for _, repository := range repos {
 		repo := repository.GetName()
 
@@ -94,15 +100,24 @@ func getAllRepos(ctx context.Context, client *github.Client, org, author string)
 		if len(output) != 0 {
 			// for markdown-friendly output
 			// TODO: refractor to be plain text friendly
-			fmt.Printf("**Repository: %s**\n", repo)
-
-			for _, line := range output {
-				fmt.Println(line)
+			_, err := f.WriteString(fmt.Sprintf("**Repository: %s**\n", repo))
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
 			}
 
-			fmt.Printf("\n\n")
+			for _, line := range output {
+				_, err := f.WriteString(line)
+				if err != nil {
+					fmt.Println(err)
+					os.Exit(1)
+				}
+			}
+
+			f.WriteString("\n\n")
 		}
 	}
+
 }
 
 // getPullRequests gets all Pull Requests created by the author.
@@ -132,7 +147,7 @@ func getCreatedPullRequests(ctx context.Context, client *github.Client, org, rep
 		serialNumber := fmt.Sprintf("%v. ", key+1)
 		pullRequestLink := fmt.Sprintf("[%s/%s#%v](%s) - ", org, repo, pr.GetNumber(), pr.GetHTMLURL()) // org/repo#number
 		pullRequestTitle := fmt.Sprintf("%s", pr.GetTitle())
-		createdPullRequests = append(createdPullRequests, fmt.Sprintf("%s%s%s", serialNumber, pullRequestLink, pullRequestTitle))
+		createdPullRequests = append(createdPullRequests, fmt.Sprintf("\n%s%s%s", serialNumber, pullRequestLink, pullRequestTitle))
 	}
 
 	return createdPullRequests
@@ -165,7 +180,7 @@ func getIssues(ctx context.Context, client *github.Client, org, repo, author str
 		serialNumber := fmt.Sprintf("%v. ", key+1)
 		issueLink := fmt.Sprintf("[%s/%s#%v](%s) - ", org, repo, issue.GetNumber(), issue.GetHTMLURL()) // org/repo#number
 		issueTitle := fmt.Sprintf("%s", issue.GetTitle())
-		createdIssues = append(createdIssues, fmt.Sprintf("%s%s%s", serialNumber, issueLink, issueTitle))
+		createdIssues = append(createdIssues, fmt.Sprintf("\n%s%s%s", serialNumber, issueLink, issueTitle))
 	}
 
 	return createdIssues
@@ -198,7 +213,7 @@ func getReviewedPullRequests(ctx context.Context, client *github.Client, org, re
 		serialNumber := fmt.Sprintf("%v. ", key+1)
 		pullRequestLink := fmt.Sprintf("[%s/%s#%v](%s) - ", org, repo, pr.GetNumber(), pr.GetHTMLURL()) // org/repo#number
 		pullRequestTitle := fmt.Sprintf("%s", pr.GetTitle())
-		reviewedPullRequests = append(reviewedPullRequests, fmt.Sprintf("%s%s%s", serialNumber, pullRequestLink, pullRequestTitle))
+		reviewedPullRequests = append(reviewedPullRequests, fmt.Sprintf("\n%s%s%s", serialNumber, pullRequestLink, pullRequestTitle))
 	}
 
 	return reviewedPullRequests
@@ -225,4 +240,14 @@ func usageAndExit(message string, exitCode int) {
 	flag.Usage()
 	fmt.Fprintf(os.Stderr, "\n")
 	os.Exit(exitCode)
+}
+
+func createOutputFile(dir, file string) (fp *os.File) {
+	os.MkdirAll(dir, os.ModePerm)
+	fp, err := os.Create(filepath.Join(dir, filepath.Base(file)))
+	if err != nil {
+		fmt.Println(err)
+		os.Exit(1)
+	}
+	return fp
 }

@@ -56,7 +56,7 @@ Example: get contribution list for `nikhita` against `kubernetes` community.
 
 The maximum number of created Pull Requests which are displayed for each repository is 100. They are displayed in the descending order of creation.
 
-The output is in the markdown format. You can copy and paste it in a markdown file and share it as a gist, etc.
+The output is in the markdown format and stored in `output/<org>/<author>.md`. You can share the markdown file as a gist, etc.
 
 **TODO**:
 
