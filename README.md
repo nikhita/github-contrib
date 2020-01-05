@@ -14,18 +14,6 @@ Also, a friendly reminder that contributions are not limited to code - it is abo
 
 **Prerequisites**: Go version 1.7 or greater.
 
-### For Go >=1.11:
-
-1. Clone the repository 
-
-```
-git clone https://github.com/nikhita/github-contrib`
-```
-
-2. `go install`
-
-### For Go <1.11
-
 1. Get the code
 
 ```
